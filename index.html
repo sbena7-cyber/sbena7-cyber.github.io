@@ -102,7 +102,7 @@ const STATIONS = [
       const s = srcs.find(x => (x.listenurl||"").endsWith("/pulstranceHD.mp3"));
       return (s && (s.title || s.server_name)) || null;
     } },
-  { n:5, name:"A State of Trance 24/7", desc:"ארמין ואן ביורן · 24/7", stream:"https://radiorecord.hostingradio.ru/asot96.aacp", meta:null },
+  { n:5, name:"Armin van Buuren - A State of Trance", desc:"ערוץ ASOT של Radio Record · שידורים חוזרים של הפרק השבועי", stream:"https://radiorecord.hostingradio.ru/asot96.aacp", meta:null },
   { n:6, name:"TrancePulse Dublin", desc:"אירלנד · טראנס", stream:"https://stream.trance.ie/mp3",
     meta: async () => {
       const r = await fetchJson("https://stream.trance.ie/status-json.xsl");
@@ -131,6 +131,7 @@ const STATIONS = [
   { n:12, section:"🧪 לניסיון", name:"DI.FM Vocal Trance", desc:"DI.FM · ווקאל טראנס · נפתח בלשונית חדשה באתר DI.FM", link:"https://www.di.fm/vocaltrance", meta:null },
   { n:13, name:"Record Trancemission", desc:"רוסיה · טראנס עם הרבה שירה", stream:"https://radiorecord.hostingradio.ru/tm96.aacp", meta:null },
   { n:14, name:"Technolovers Uplifting Trance", desc:"גרמניה · אפליפטינג טראנס (שירה מלודית)", stream:"https://stream.technolovers.fm/uplifting-trance", meta:null },
+  { n:15, name:"Record Armin van Buuren", desc:"רוסיה · המוזיקה של ארמין ואן ביורן (לא התוכנית)", stream:"https://radiorecord.hostingradio.ru/armin96.aacp", meta:null },
 ];
 
 const audio = document.getElementById("player");
