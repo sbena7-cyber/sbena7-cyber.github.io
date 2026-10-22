@@ -128,6 +128,9 @@ const STATIONS = [
       const s = srcs.find(x => (x.listenurl||"").endsWith("/vocaltrance"));
       return (s && (s.yp_currently_playing || s.title)) || null;
     } },
+  { n:12, section:"🧪 לניסיון", name:"DI.FM Vocal Trance", desc:"DI.FM · ווקאל טראנס · נפתח בלשונית חדשה באתר DI.FM", link:"https://www.di.fm/vocaltrance", meta:null },
+  { n:13, name:"Record Trancemission", desc:"רוסיה · טראנס עם הרבה שירה", stream:"https://radiorecord.hostingradio.ru/tm96.aacp", meta:null },
+  { n:14, name:"Technolovers Uplifting Trance", desc:"גרמניה · אפליפטינג טראנס (שירה מלודית)", stream:"https://stream.technolovers.fm/uplifting-trance", meta:null },
 ];
 
 const audio = document.getElementById("player");
@@ -175,9 +178,9 @@ STATIONS.forEach((st,i)=>{
       <div class="song" id="song${i}"></div>
       <div class="err" id="err${i}">הזרם לא זמין כרגע — נסה שוב בעוד רגע</div>
     </div>
-    <button class="playbtn" aria-label="נגן ${st.name}">
-      <svg viewBox="0 0 24 24" class="ic-play"><path d="M8 5v14l11-7z"/></svg>
-      <svg viewBox="0 0 24 24" class="ic-pause" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+    <button class="playbtn" aria-label="${st.link?'פתח':'נגן'} ${st.name}">
+      ${st.link ? '<svg viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3zM5 5h6v2H5v12h12v-6h2v8H3V5h2z"/></svg>' : '<svg viewBox="0 0 24 24" class="ic-play"><path d="M8 5v14l11-7z"/></svg>'}
+      ${st.link ? '' : '<svg viewBox="0 0 24 24" class="ic-pause" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'}
     </button>`;
   el.addEventListener("click", ()=>toggle(i));
   el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault(); toggle(i);} });
@@ -192,6 +195,7 @@ function setSong(i, html, na){
 async function refreshMeta(){
   for (let i=0;i<STATIONS.length;i++){
     const st = STATIONS[i];
+    if (st.link){ setSong(i,"קישור לאתר חיצוני — לא מנגן בתוך הדף", true); continue; }
     if (!st.meta){ setSong(i,"רדיו חי · שם השיר לא זמין לתחנה זו", true); continue; }
     if (!st._tried){ setSong(i,'<span class="spinner"></span> בודק שם שיר…', true); }
     try {
@@ -211,6 +215,7 @@ function updateUI(){
     const card = document.getElementById("st"+i);
     const playing = (i===current && !audio.paused);
     card.classList.toggle("playing", playing);
+    if (st.link) return;
     card.querySelector(".ic-play").style.display = playing ? "none" : "";
     card.querySelector(".ic-pause").style.display = playing ? "" : "none";
   });
@@ -220,8 +225,9 @@ function toggle(i){
   play(i);
 }
 function play(i){
-  current = i;
   const st = STATIONS[i];
+  if (st.link){ window.open(st.link, "_blank", "noopener"); return; }
+  current = i;
   document.getElementById("err"+i).style.display="none";
   if (audio.src !== st.stream) audio.src = st.stream;
   audio.play().catch(()=>{ document.getElementById("err"+i).style.display="block"; });
@@ -230,14 +236,18 @@ function play(i){
   }
   updateUI();
 }
+function step(d){
+  let k = current<0 ? 0 : current;
+  for (let n=0;n<STATIONS.length;n++){ k=(k+d+STATIONS.length)%STATIONS.length; if(!STATIONS[k].link){ play(k); return; } }
+}
 audio.addEventListener("play", updateUI);
 audio.addEventListener("pause", updateUI);
 audio.addEventListener("error", ()=>{ if(current>=0){ document.getElementById("err"+current).style.display="block"; } updateUI(); });
 if ("mediaSession" in navigator){
   navigator.mediaSession.setActionHandler("play", ()=>{ if(current<0) play(0); else audio.play(); });
   navigator.mediaSession.setActionHandler("pause", ()=>audio.pause());
-  navigator.mediaSession.setActionHandler("previoustrack", ()=>play((current-1+STATIONS.length)%STATIONS.length));
-  navigator.mediaSession.setActionHandler("nexttrack", ()=>play((current+1)%STATIONS.length));
+  navigator.mediaSession.setActionHandler("previoustrack", ()=>step(-1));
+  navigator.mediaSession.setActionHandler("nexttrack", ()=>step(1));
 }
 document.getElementById("vol").addEventListener("input", e=>{ audio.volume = e.target.value/100; });
 audio.volume = 0.8;
