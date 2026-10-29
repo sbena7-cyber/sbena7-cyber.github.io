@@ -76,6 +76,58 @@
     border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px;}
   @keyframes spin{to{transform:rotate(360deg)}}
   h2.sec{font-size:18px; margin:26px 4px 10px; color:var(--accent);}
+
+  /* Compact, responsive station layout. Station data and player stay unchanged. */
+  .wrap{max-width:1040px;}
+  body{padding:16px 18px 32px;}
+  header{padding:8px 6px 22px;}
+  #list{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+  #list > .sec{grid-column:1 / -1; margin:16px 2px 2px; padding-bottom:8px;
+    border-bottom:1px solid var(--line);}
+  .station{min-width:0; gap:12px; padding:14px; margin-bottom:0; border-radius:16px;}
+  .name{font-size:16px; line-height:1.4; overflow-wrap:anywhere;}
+  .desc{line-height:1.5;}
+  .song{font-size:13px; margin-top:5px;}
+  .num{min-width:28px; height:28px; border-radius:9px;}
+  .playbtn{min-width:48px; width:48px; height:48px;}
+  .playbtn svg{width:23px; height:23px;}
+  .station:focus-visible,.playbtn:focus-visible,.navbtn:focus-visible{outline:2px solid var(--accent2); outline-offset:4px;}
+  @media (hover:hover){.station[role=button]:hover{background:var(--card-on); border-color:#66538e;}}
+  #ytcard{margin-top:10px; padding:18px;}
+  #ytframe{width:100%; max-width:560px; height:auto; aspect-ratio:16 / 9;}
+  .controls{z-index:10; max-width:640px; margin:16px auto 0; gap:12px;
+    box-shadow:0 8px 28px rgba(0,0,0,.3); padding:10px 14px;}
+  .navbtn{min-height:44px;}
+  input[type=range]{min-width:0;}
+  footer{margin-top:18px;}
+  @media (max-width:600px){
+    body{padding:12px 10px 28px;}
+    header{padding:6px 0 18px;}
+    h1{font-size:23px;}
+    .sub{font-size:13px; margin-top:6px;}
+    #list{gap:8px;}
+    #list > .sec{font-size:17px; margin-top:14px;}
+    #list > .station{display:grid; grid-template-columns:1fr 44px; gap:8px;
+      align-content:start; align-items:center; padding:10px; border-radius:14px;}
+    #list .num{justify-self:start; min-width:26px; width:26px; height:26px; font-size:12px;}
+    #list .playbtn{grid-column:2; grid-row:1; min-width:44px; width:44px; height:44px;}
+    #list .info{grid-column:1 / -1; grid-row:2; align-self:start;}
+    .name{font-size:14px; line-height:1.45;}
+    .desc{font-size:12px;}
+    .song{font-size:12px; line-height:1.45;}
+    .eq{margin-inline-start:4px; gap:2px;}
+    .controls{gap:7px; padding:8px; bottom:8px;}
+    .navbtn{padding:8px; font-size:13px; border-radius:10px;}
+    .controls label{font-size:12px;}
+    #ytcard{padding:14px;}
+  }
+  @media (max-width:359px){
+    #list{grid-template-columns:minmax(0,1fr);}
+    #list > .station{display:flex; gap:10px;}
+    #list .info{flex:1;}
+    .controls{flex-wrap:wrap;}
+    .controls input[type=range]{flex-basis:40%;}
+  }
 </style>
 </head>
 <body>
