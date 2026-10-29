@@ -95,6 +95,9 @@
   @media (hover:hover){.station[role=button]:hover{background:var(--card-on); border-color:#66538e;}}
   #ytcard{margin-top:10px; padding:18px;}
   #ytframe{width:100%; max-width:560px; height:auto; aspect-ratio:16 / 9;}
+  .ytseek{display:flex; align-items:center; gap:10px; margin-top:14px;}
+  .ytime{color:var(--dim); font-size:12px; min-width:42px; text-align:center; direction:ltr; unicode-bidi:isolate; font-variant-numeric:tabular-nums;}
+  .seekrow{display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap;}
   .controls{z-index:10; max-width:640px; margin:16px auto 0; gap:12px;
     box-shadow:0 8px 28px rgba(0,0,0,.3); padding:10px 14px;}
   .navbtn{min-height:44px;}
@@ -141,7 +144,16 @@
   <section class="station" id="ytcard" style="display:block;cursor:default" aria-label="מיקס מיוטיוב לניסיון">
     <div class="name">16 · דיפ האוס מיוטיוב - Gaz Rilex</div>
     <p class="desc" style="margin:6px 0 12px">Deep House Mix 2026 · המיקס שבחרת<br>לפני הניגון, עצור את הרדיו. עוצמת השמע נשלטת בנגן YouTube.</p>
-    <iframe width="320" height="200" style="display:block;max-width:100%;margin:auto;border:0;border-radius:12px" id="ytframe" src="https://www.youtube-nocookie.com/embed/RTuVDJdF8T8?enablejsapi=1" title="Deep House Mix 2026 - Gaz Rilex" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <iframe width="320" height="200" style="display:block;max-width:100%;margin:auto;border:0;border-radius:12px" id="ytframe" src="https://www.youtube-nocookie.com/embed/RTuVDJdF8T8?enablejsapi=1&listType=playlist&list=RDRTuVDJdF8T8" title="Deep House Mix 2026 - Gaz Rilex" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <div class="ytseek">
+      <span class="ytime" id="ytcur">0:00</span>
+      <input type="range" id="ytprog" min="0" max="1000" value="0" aria-label="מיקום במיקס של יוטיוב">
+      <span class="ytime" id="ytdur">0:00</span>
+    </div>
+    <div class="seekrow">
+      <button type="button" class="navbtn" id="ytprev" aria-label="הקודם במיקס של יוטיוב">⏮ הקודם</button>
+      <button type="button" class="navbtn" id="ytnext" aria-label="הבא במיקס של יוטיוב">הבא ⏭</button>
+    </div>
   </section>
   <div class="controls">
     <button id="prev" class="navbtn" aria-label="התחנה הקודמת">▶ הקודם</button>
@@ -331,6 +343,90 @@ function ytCmd(func){
 }
 function playYT(){ ytCmd("playVideo"); }
 function pauseYT(){ ytCmd("pauseVideo"); }
+// YouTube IFrame Player API — עבור סרגל ההתקדמות וכפתורי קודם/הבא של הכרטיס.
+// אם ה-API לא זמין, הפקדים האלה פשוט לא עושים כלום והדף ממשיך לעבוד כרגיל.
+let ytApiPlayer = null;
+let ytApiReady = false;
+let ytDragging = false;
+let ytHasPlaylist = false;
+(function initYouTubeApi(){
+  window.onYouTubeIframeAPIReady = function(){
+    try {
+      ytApiPlayer = new YT.Player("ytframe", {
+        events: { onReady: function(){ ytApiReady = true; } }
+      });
+    } catch(e){ ytApiPlayer = null; }
+  };
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  tag.onerror = function(){ ytApiPlayer = null; ytApiReady = false; };
+  document.head.appendChild(tag);
+})();
+function ytOk(){ return ytApiReady && ytApiPlayer && typeof ytApiPlayer.getCurrentTime === "function" && typeof ytApiPlayer.getDuration === "function"; }
+function ytFmt(s){
+  s = Math.max(0, Math.floor(s || 0));
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+  const mm = h>0 ? String(m).padStart(2,"0") : String(m);
+  return (h>0 ? h+":" : "") + mm + ":" + String(ss).padStart(2,"0");
+}
+function ytCheckPlaylist(){
+  try {
+    if (ytApiPlayer && typeof ytApiPlayer.getPlaylist === "function"){
+      const pl = ytApiPlayer.getPlaylist();
+      if (pl && pl.length > 1) ytHasPlaylist = true;
+    }
+  } catch(e){}
+  return ytHasPlaylist;
+}
+function ytPoll(){
+  if (!ytOk()) return;
+  ytCheckPlaylist();
+  if (ytDragging) return;
+  try {
+    const d = ytApiPlayer.getDuration() || 0, t = ytApiPlayer.getCurrentTime() || 0;
+    document.getElementById("ytprog").value = d > 0 ? Math.round((t/d)*1000) : 0;
+    document.getElementById("ytcur").textContent = ytFmt(t);
+    document.getElementById("ytdur").textContent = ytFmt(d);
+  } catch(e){}
+}
+setInterval(ytPoll, 1000);
+const ytProg = document.getElementById("ytprog");
+ytProg.addEventListener("pointerdown", ()=>{ ytDragging = true; });
+ytProg.addEventListener("keydown", ()=>{ ytDragging = true; });
+ytProg.addEventListener("input", ()=>{
+  if (!ytOk()) return;
+  try {
+    const d = ytApiPlayer.getDuration() || 0;
+    document.getElementById("ytcur").textContent = ytFmt(d * ytProg.value/1000);
+  } catch(e){}
+});
+ytProg.addEventListener("change", ()=>{
+  try {
+    if (ytOk()){
+      const d = ytApiPlayer.getDuration() || 0;
+      if (d > 0 && typeof ytApiPlayer.seekTo === "function") ytApiPlayer.seekTo(d * ytProg.value/1000, true);
+    }
+  } catch(e){}
+  ytDragging = false;
+});
+ytProg.addEventListener("click", e=>e.stopPropagation());
+function ytPrev(){
+  try {
+    if (ytOk() && ytCheckPlaylist() && typeof ytApiPlayer.previousVideo === "function"){ ytApiPlayer.previousVideo(); return; }
+    if (ytOk() && typeof ytApiPlayer.seekTo === "function") ytApiPlayer.seekTo(0, true);
+  } catch(e){}
+}
+function ytNext(){
+  try {
+    if (ytOk() && ytCheckPlaylist() && typeof ytApiPlayer.nextVideo === "function"){ ytApiPlayer.nextVideo(); return; }
+    if (ytOk() && typeof ytApiPlayer.seekTo === "function"){
+      const d = ytApiPlayer.getDuration() || 0, t = ytApiPlayer.getCurrentTime() || 0;
+      if (d > 0) ytApiPlayer.seekTo(Math.max(0, Math.min(d - 1, t + 180)), true);
+    }
+  } catch(e){}
+}
+document.getElementById("ytprev").addEventListener("click", e=>{ e.stopPropagation(); ytPrev(); });
+document.getElementById("ytnext").addEventListener("click", e=>{ e.stopPropagation(); ytNext(); });
 audio.addEventListener("play", updateUI);
 audio.addEventListener("pause", updateUI);
 audio.addEventListener("error", ()=>{ if(current>=0){ document.getElementById("err"+current).style.display="block"; } updateUI(); });
