@@ -210,6 +210,11 @@ const STATIONS = [
   { n:13, name:"Record Trancemission", desc:"רוסיה · טראנס עם הרבה שירה", stream:"https://radiorecord.hostingradio.ru/tm96.aacp", meta:null },
   { n:14, name:"Technolovers Uplifting Trance", desc:"גרמניה · אפליפטינג טראנס (שירה מלודית)", stream:"https://stream.technolovers.fm/uplifting-trance", meta:null },
   { n:15, name:"Record Armin van Buuren", desc:"רוסיה · המוזיקה של ארמין ואן ביורן (לא התוכנית)", stream:"https://radiorecord.hostingradio.ru/armin96.aacp", meta:null },
+  { n:17, name:"GANORIUM Radio", desc:"גרמניה · טראנס ווקאלי ואפליפטינג · 24/7", stream:"https://ganorium-radio.stream.laut.fm/ganorium-radio",
+    meta: async () => {
+      const r = await fetchJson("https://api.laut.fm/station/ganorium-radio/current_song");
+      return r.title ? ((r.artist && r.artist.name ? r.artist.name + " - " : "") + r.title) : null;
+    } },
 ];
 
 const audio = document.getElementById("player");
@@ -266,6 +271,10 @@ STATIONS.forEach((st,i)=>{
   el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault(); toggle(i);} });
   list.appendChild(el);
 });
+// Keep the new trial station after the existing YouTube card.
+const ganoriumCard = document.getElementById("st15");
+ganoriumCard.style.marginTop = "10px";
+document.getElementById("ytcard").after(ganoriumCard);
 
 function setSong(i, html, na){
   const el = document.getElementById("song"+i);
@@ -319,15 +328,15 @@ function play(i){
   updateUI();
 }
 function step(d){
-  const last = STATIONS.length - 1;
-  if (onYT){ onYT = false; pauseYT(); play(d > 0 ? 0 : last); return; }
-  if (current < 0){ play(d > 0 ? 0 : last); return; }
-  let n = current;
-  for (let c = 0; c < STATIONS.length; c++){
-    n += d;
-    if (n < 0 || n > last){ goYT(); return; }
-    if (!STATIONS[n].link){ play(n); return; }
-  }
+  // Visual order: radio cards 1-15, YouTube 16, GANORIUM 17.
+  const order = STATIONS.map((st,i)=>i).filter(i=>!STATIONS[i].link);
+  order.splice(order.indexOf(STATIONS.findIndex(st=>st.n===17)), 0, "yt");
+  const selected = onYT ? "yt" : current;
+  const at = order.indexOf(selected);
+  const next = at < 0 ? (d > 0 ? order[0] : order[order.length-1])
+    : order[(at + d + order.length) % order.length];
+  if (next === "yt"){ goYT(); return; }
+  play(next);
 }
 function goYT(){
   onYT = true;
