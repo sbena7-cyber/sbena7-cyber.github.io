@@ -142,7 +142,7 @@
   </header>
   <div id="list"></div>
   <section class="station" id="ytcard" style="display:block;cursor:default" aria-label="מיקס מיוטיוב לניסיון">
-    <div class="name">17 · דיפ האוס מיוטיוב - Gaz Rilex</div>
+    <div class="name">16 · דיפ האוס מיוטיוב - Gaz Rilex</div>
     <p class="desc" style="margin:6px 0 12px">Deep House Mix 2026 · המיקס שבחרת<br>לפני הניגון, עצור את הרדיו. עוצמת השמע נשלטת בנגן YouTube.</p>
     <iframe width="320" height="200" style="display:block;max-width:100%;margin:auto;border:0;border-radius:12px" id="ytframe" src="https://www.youtube-nocookie.com/embed/RTuVDJdF8T8?enablejsapi=1&listType=playlist&list=RDRTuVDJdF8T8" title="Deep House Mix 2026 - Gaz Rilex" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     <div class="ytseek">
@@ -180,7 +180,7 @@ const STATIONS = [
       const s = srcs.find(x => (x.listenurl||"").endsWith("/pulstranceHD.mp3"));
       return (s && (s.title || s.server_name)) || null;
     } },
-  { n:5, name:"Armin van Buuren - A State of Trance", desc:"ערוץ ASOT של Radio Record · שידורים חוזרים של הפרק השבועי", stream:"https://radiorecord.hostingradio.ru/asot96.aacp", meta:null },
+  { n:5, name:"Record Armin van Buuren", desc:"רוסיה · המוזיקה של ארמין ואן ביורן (לא התוכנית)", stream:"https://radiorecord.hostingradio.ru/armin96.aacp", meta:null },
   { n:6, name:"GANORIUM Radio", desc:"גרמניה · טראנס ווקאלי ואפליפטינג · 24/7", stream:"https://ganorium-radio.stream.laut.fm/ganorium-radio",
     meta: async () => {
       const r = await fetchJson("https://api.laut.fm/station/ganorium-radio/current_song");
@@ -212,9 +212,8 @@ const STATIONS = [
       return (s && (s.yp_currently_playing || s.title)) || null;
     } },
   { n:13, section:"🧪 לניסיון", name:"DI.FM Vocal Trance", desc:"DI.FM · ווקאל טראנס · נפתח בלשונית חדשה באתר DI.FM", link:"https://www.di.fm/vocaltrance", meta:null },
-  { n:14, name:"Record Trancemission", desc:"רוסיה · טראנס עם הרבה שירה", stream:"https://radiorecord.hostingradio.ru/tm96.aacp", meta:null },
-  { n:15, name:"Technolovers Uplifting Trance", desc:"גרמניה · אפליפטינג טראנס (שירה מלודית)", stream:"https://stream.technolovers.fm/uplifting-trance", meta:null },
-  { n:16, name:"Record Armin van Buuren", desc:"רוסיה · המוזיקה של ארמין ואן ביורן (לא התוכנית)", stream:"https://radiorecord.hostingradio.ru/armin96.aacp", meta:null },
+  { n:14, name:"Technolovers Uplifting Trance", desc:"גרמניה · אפליפטינג טראנס (שירה מלודית)", stream:"https://stream.technolovers.fm/uplifting-trance", meta:null },
+  { n:15, name:"Armin van Buuren - A State of Trance", desc:"ערוץ ASOT של Radio Record · שידורים חוזרים של הפרק השבועי", stream:"https://radiorecord.hostingradio.ru/asot96.aacp", meta:null },
 ];
 
 const audio = document.getElementById("player");
